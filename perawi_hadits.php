@@ -8,7 +8,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 		
-		<title>BULUGHUL ZAKAT</title>
+		<title>BULUGHUL MARAM</title>
 		
 		<link rel="shortcut icon" href="images/hadits.jpg">
 		<link rel="stylesheet" type="text/css" href="assests/bootstrap/css/bootstrap.css">
@@ -25,7 +25,7 @@
 		<div id="wrapper">
 			<nav class="navbar navbar-inverse">
 				<div class="container-fluid">
-					<a href="home_search.php" class="navbar-brand" target="blank">BULUGHUL ZAKAT</a>
+					<a href="home_search.php" class="navbar-brand" target="blank">BULUGHUL MARAM</a>
 				
 					<form class="navbar-form pull-left" action="hasil_search.php" method="POST">
                             <input class="form-control mr-sm-2" type="text" name="cari" placeholder="Kata Kunci" aria-label="Search">
@@ -43,7 +43,8 @@
 					<thead>
 						<tr>
 							<th>NO</th>
-							<th>BAGIAN</th>
+							<th>KITAB</th>
+							<th>BAB</th>
 							<th>HADITS</th>
 						</tr>
 					</thead>
@@ -51,7 +52,8 @@
 					<tfoot>
 						<tr>	
 							<th>NO</th>
-							<th>BAGIAN</th>
+							<th>KITAB</th>
+							<th>BAB</th>
 							<th>HADITS</th>
 						</tr>	
 					</tfoot>
@@ -61,13 +63,14 @@
 							include("connection.php");
 							$id = $_GET['id'];
 							
-							$sql = mysqli_query($connect, "SELECT * FROM zakat WHERE perawi = '$id'");
+							$sql = mysqli_query($connect, "SELECT * FROM tbl_hadits WHERE perawi = '$id'");
 							while($query = mysqli_fetch_array($sql)){
 						?>
 								<tr>
-									<td><?php echo $query['no_zakat'];?></td>
+									<td><?php echo $query['no_hadits'];?></td>
+									<td><?php echo $query['kitab'];?></td>
 									<td><?php echo $query['bagian'];?></td>
-									<td><a href="detail_hadits.php?id=<?php echo $query['no_zakat'];?>" target="blank"><?php echo $query['terjemahan'];?></a></td>
+									<td><a href="detail_hadits.php?id=<?php echo $query['no_hadits'];?>" target="blank"><?php echo $query['terjemahan'];?></a></td>
 								</tr>
 						<?php
 							}

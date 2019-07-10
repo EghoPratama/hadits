@@ -8,7 +8,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 		
-		<title>BULUGHUL ZAKAT</title>
+		<title>BULUGHUL MARAM</title>
 		
 		<link rel="shortcut icon" href="images/hadits.jpg">
 		<link rel="stylesheet" type="text/css" href="assests/bootstrap/css/bootstrap.css">
@@ -25,7 +25,7 @@
 		<div id="wrapper">
 			<nav class="navbar navbar-inverse">
 				<div class="container-fluid">
-					<a href="home_search.php" class="navbar-brand" target="blank">BULUGHUL ZAKAT</a>
+					<a href="home_search.php" class="navbar-brand" target="blank">BULUGHUL MARAM</a>
 				
 					<form class="navbar-form pull-left" action="hasil_search.php" method="POST">
                             <input class="form-control mr-sm-2" type="text" name="cari" placeholder="Kata Kunci" aria-label="Search">
@@ -36,12 +36,13 @@
 			
 			<div class="container">
 				<h1 class="page-header">
-					<span class="glyphicon glyphicon-book"></span>Bagian : <?php echo $id = $_GET['id'];?>
+					<span class="glyphicon glyphicon-book"></span>Bab : <?php echo $id = $_GET['id'];?>
 				</h1>
 				<table class="table table-striped table-bordered table-hover" id="mydata">
 					<thead>
 						<tr>
 							<th>NO</th>
+							<th>KITAB</th>
 							<th>PERAWI</th>
 							<th>HADITS</th>
 						</tr>
@@ -50,6 +51,7 @@
 					<tfoot>
 						<tr>	
 							<th>NO</th>
+							<th>KITAB</th>
 							<th>PERAWI</th>
 							<th>HADITS</th>
 						</tr>	
@@ -60,13 +62,14 @@
 							include("connection.php");
 							$id = $_GET['id'];
 							
-							$sql = mysqli_query($connect, "SELECT * FROM zakat WHERE bagian = '$id'");
+							$sql = mysqli_query($connect, "SELECT * FROM tbl_hadits WHERE bagian = '$id'");
 							while($query = mysqli_fetch_array($sql)){
 						?>
 								<tr>
-									<td><?php echo $query['no_zakat'];?></td>
+									<td><?php echo $query['no_hadits'];?></td>
+									<td><?php echo $query['kitab'];?></td>
 									<td><?php echo $query['perawi'];?></td>
-									<td><a href="detail_hadits.php?id=<?php echo $query['no_zakat'];?>" target="blank"><?php echo $query['terjemahan'];?></a></td>
+									<td><a href="detail_hadits.php?id=<?php echo $query['no_hadits'];?>" target="blank"><?php echo $query['terjemahan'];?></a></td>
 								</tr>
 						<?php
 							}

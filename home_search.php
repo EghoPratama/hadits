@@ -8,7 +8,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 		
-		<title>BULUGHUL ZAKAT</title>
+		<title>BULUGHUL MARAM</title>
 		
 		<link rel="shortcut icon" href="images/hadits.jpg">
 		<link rel="stylesheet" type="text/css" href="assests/bootstrap/css/bootstrap.css">
@@ -20,7 +20,7 @@
 			<div class="text-center">
 				<img src="images/hadits.jpg" style="height:300px; width:300px; margin-top:100px">
 				
-				<h4>Menampilkan hadits - hadits dari kitab Bulughul Maram khusus untuk bagian zakat</h4>
+				<h4>Menampilkan hadits - hadits dari kitab Bulughul Maram</h4>
 				
 				<form class="form-inline my-2 my-lg-2" action="hasil_search.php" method="POST">
 					<input class="form-control mr-sm-2" type="text" name="cari" placeholder="Kata Kunci" aria-label="Search" style="width:600px">
@@ -34,7 +34,7 @@
 					<?php
 						include("connection.php");
 							
-						$sql = mysqli_query($connect,"SELECT COUNT(*) AS jumlah FROM zakat");
+						$sql = mysqli_query($connect,"SELECT COUNT(*) AS jumlah FROM tbl_hadits");
 						$result = mysqli_fetch_array($sql);
 					?>
 					<small class="progress-note"><?php echo $result['jumlah'];?> hadits terdata</small>

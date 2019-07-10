@@ -8,20 +8,24 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 		
-		<title>BULUGHUL ZAKAT</title>
+		<title>BULUGHUL MARAM</title>
 		
 		<link rel="shortcut icon" href="images/hadits.jpg">
 		<link rel="stylesheet" type="text/css" href="assests/bootstrap/css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="assests/bootstrap/css/bootstrap.min.css">
-		<script type="text/javascript" src="assests/jquery/jquery.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="assests/datatables/css/dataTables.bootstrap.css">	
+		
 		<script src="assests/jquery/jquery.js"></script>
+		<script src="assests/bootstrap/js/bootstrap.min.js"></script>
+		<script src="assests/datatables/js/jquery.dataTables.min.js"></script>
+		<script src="assests/datatables/js/dataTables.bootstrap.js"></script>
 	</head>
 	
 	<body>
 		<div id="wrapper">
 			<nav class="navbar navbar-inverse">
 				<div class="container-fluid">
-					<a href="home_search.php" class="navbar-brand">BULUGHUL ZAKAT</a>
+					<a href="home_search.php" class="navbar-brand">BULUGHUL MARAM</a>
 				
 					<form class="navbar-form pull-left" action="hasil_search.php" method="POST">
                             <input class="form-control mr-sm-2" type="text" name="cari" id="cari" placeholder="Kata Kunci" aria-label="Search">
@@ -39,49 +43,88 @@
 					<thead>
 						<tr>
 							<th>NO</th>
-							<th>BAGIAN</th>
-							<th>PERAWI</th>
 							<th>HADITS</th>
-							<th>TERJEMAHAN</th>
+							<th>RANKING</th>
 						</tr>
 					</thead>
 						
 					<tfoot>
 						<tr>
 							<th>NO</th>
-							<th>BAGIAN</th>
-							<th>PERAWI</th>
 							<th>HADITS</th>
-							<th>TERJEMAHAN</th>
+							<th>RANKING</th>
 						</tr>
 					</tfoot>
 					
 					<tbody>
 						<?php
 							include("connection.php");
+							include("preprocessing.php");
+							include("vsm.php");
 							
-							if(isset($_POST['cari'])){
-								$cari = $_POST['cari'];
-								$cari_fix = strtolower(str_replace(" ","%",$cari));
-								$sql = mysqli_query($connect,"SELECT * FROM zakat WHERE lower(terjemahan) like '%".$cari_fix."%' or lower(bagian) like '%".$cari_fix."%' or lower(perawi) like '%".$cari_fix."%' or hadits like '%".$cari_fix."%'");
-								while($query = mysqli_fetch_array($sql)){
-						?>
-								<tr>
-									<td><?php echo $query['no_zakat'];?></td>
-									<td><?php echo $query['bagian'];?></td>
-									<td><?php echo $query['perawi'];?></td>
-									<td><?php echo $query['hadits'];?></td>
-									<td><a href="detail_hadits.php?id=<?php echo $query['no_zakat'];?>" target="blank"><?php echo $query['terjemahan'];?></a></td>
-								</tr>
-						<?php
-								}
-							}else{
-								echo "<script>alert('data tidak berhasil ditemukan!');window.location='data_hadits.php';</script>";
+							$prepro = new Preprocessing();
+							$vsm = new VSM();
+							
+							$query = $prepro::preprocess($_POST['cari']);
+							
+							$connect = mysqli_query(mysqli_connect('localhost', 'root', '', 'bulughul_maram'), "SELECT * FROM tbl_hadits");
+							$arrayDokumen = [];
+							while($row = mysqli_fetch_assoc($connect)){
+								$arrayDoc = [
+									'id' => $row['no_hadits'],
+									'hadits' => $row['text_processing']
+								];
+								//json_encode($arrayDoc);
+								array_push($arrayDokumen, $arrayDoc);
 							}
+							
+							$rank = $vsm::get_rank($query, $arrayDokumen);
+							
+							//$hadits = implode(" ", $query);
+							//echo $hadits;
+							
+							$countHadits = sizeof($rank);
+							
+							//$arrayRanking = array_column($rank,'ranking');
+							
+							//print_r($arrayRanking);
+							
+							for($i=0;$i<$countHadits;$i++){
+								$id = $rank[$i]['id'];
+								$finalRanking = $rank[$i]['ranking']; 
+								$update = mysqli_query(mysqli_connect('localhost', 'root', '', 'bulughul_maram'), "UPDATE tbl_hadits SET ranking = '$finalRanking' WHERE no_hadits='$id'");
+								if(isset($finalRanking)>0){
+									$hasil = mysqli_query(mysqli_connect('localhost', 'root', '', 'bulughul_maram'), "SELECT * from tbl_hadits WHERE no_hadits='$id' AND ranking != 0 ORDER BY ranking DESC");
+									while($hasilFinal = mysqli_fetch_array($hasil)){
+						?>				
+									<tr>	
+										<td><?php echo $hasilFinal['no_hadits'];?></td>
+										<td><a href="detail_hadits.php?id=<?php echo $hasilFinal['no_hadits'];?>"target="blank"><?php echo $hasilFinal['terjemahan'];?></a></td>
+										<td><?php echo $hasilFinal['ranking'];?></td>
+									</tr>
+						<?php			
+									}
+								}	
+							}
+							$result = mysqli_query(mysqli_connect('localhost', 'root', '', 'bulughul_maram'), "SELECT COUNT(*) AS total from tbl_hadits WHERE ranking != 0");
+							$total_pencarian = mysqli_fetch_array($result);
+							echo $total_pencarian['total'];
+						?>
+						
+						<br></br>
+						<?php	
+							$string = implode(" ", $query);
+							$document_result = mysqli_query(mysqli_connect('localhost', 'root', '', 'bulughul_maram'), "SELECT COUNT(*) AS total_dokumen from tbl_hadits WHERE text_processing like '%$string%'");
+							$dokumen_pencarian = mysqli_fetch_array($document_result);
+							echo $dokumen_pencarian['total_dokumen'];
 						?>	
 					</tbody>
 				</table>
 			</div>
+			
+			<footer class="footer text-center" style="position: relative; background-color:#222; color:white; padding:10px 20px; bottom: -50px">
+				Copyright © Informatika UIN BDG 2018
+			</footer>
 	
 		</div>
 		
@@ -95,32 +138,4 @@
 			"searching": false
 		});
 	});
-	
-	var allow = true;
-    $(document).ready(function(){
-        $("#cari").keyup(function(e){
-            if(e.which == '13'){
-                e.preventDefault();
-                loadData();
-            }else if($(this).val().length >= 0){
-                loadData();
-            }
-        });
-    });
-    function loadData(){
-    var query=document.getElementById('cari').value;
-        if(allow){
-            allow = false;
-            $("#result").html('loading...');
-            $.ajax({
-                url:'hasil_search.php?q='+query,
-                success:
-                    function (data){
-                    $("#result").html(data);
-                    allow = true;
-                }
-            });
-        }
-    }
-
 </script>
